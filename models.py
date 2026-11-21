@@ -1,4 +1,5 @@
 import os
+import shutil
 import tempfile
 from datetime import datetime, timezone
 from typing import List, Optional
@@ -11,30 +12,46 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 # Database Configuration (Vercel Serverless & Local Compatible)
 # ---------------------------------------------------------------------------
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Detect Vercel / AWS Lambda serverless read-only filesystem
 is_serverless = bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
 
 DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    if is_serverless:
-        # /var/task is read-only on Vercel; writable storage is strictly in /tmp
-        tmp_db = os.path.join(tempfile.gettempdir(), "secureprice.db").replace("\\", "/")
-        DATABASE_URL = f"sqlite:///{tmp_db}"
-    else:
+
+if is_serverless:
+    # Vercel /var/task is strictly read-only. Only /tmp is writable.
+    tmp_data_dir = os.path.join(tempfile.gettempdir(), "data")
+    try:
+        os.makedirs(tmp_data_dir, exist_ok=True)
+    except Exception:
+        pass
+
+    tmp_db_path = os.path.join(tmp_data_dir, "secureprice.db").replace("\\", "/")
+
+    # If seed database exists in read-only /var/task/data, copy it to writable /tmp/data
+    source_seed_db = os.path.join(BASE_DIR, "data", "secureprice.db")
+    if not os.path.exists(tmp_db_path) and os.path.exists(source_seed_db):
         try:
-            os.makedirs("data", exist_ok=True)
-            DATABASE_URL = "sqlite:///./data/secureprice.db"
-        except (OSError, PermissionError):
-            tmp_db = os.path.join(tempfile.gettempdir(), "secureprice.db").replace("\\", "/")
-            DATABASE_URL = f"sqlite:///{tmp_db}"
+            shutil.copy2(source_seed_db, tmp_db_path)
+        except Exception as copy_err:
+            print(f"Notice: Could not copy seed db to /tmp/data: {copy_err}")
+
+    # If no remote DB is provided (or if default sqlite ./data is specified), use /tmp/data
+    if not DATABASE_URL or ("sqlite:///" in DATABASE_URL and ("./data" in DATABASE_URL or "/var/task" in DATABASE_URL)):
+        DATABASE_URL = f"sqlite:///{tmp_db_path}"
 else:
-    # If custom SQLite URL points to ./data, ensure folder exists or fallback to /tmp
-    if "sqlite:///" in DATABASE_URL and "./data" in DATABASE_URL:
+    # Local development or Docker environment
+    if not DATABASE_URL:
+        local_data_dir = os.path.join(BASE_DIR, "data")
         try:
-            os.makedirs("data", exist_ok=True)
+            os.makedirs(local_data_dir, exist_ok=True)
+            local_db_path = os.path.join(local_data_dir, "secureprice.db").replace("\\", "/")
+            DATABASE_URL = f"sqlite:///{local_db_path}"
         except (OSError, PermissionError):
-            tmp_db = os.path.join(tempfile.gettempdir(), "secureprice.db").replace("\\", "/")
-            DATABASE_URL = f"sqlite:///{tmp_db}"
+            tmp_data_dir = os.path.join(tempfile.gettempdir(), "data")
+            os.makedirs(tmp_data_dir, exist_ok=True)
+            tmp_db_path = os.path.join(tmp_data_dir, "secureprice.db").replace("\\", "/")
+            DATABASE_URL = f"sqlite:///{tmp_db_path}"
 
 try:
     engine = create_engine(
