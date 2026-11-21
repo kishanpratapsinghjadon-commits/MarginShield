@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarginShield | Smart Pricing &amp; Fraud Protection</title>
+    <!-- Tailwind CSS with custom styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'Menlo', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        /* Subtle mesh background for Dark Mode */
+        .dark body {
+            background-color: #070a12;
+            color: #f1f5f9;
+            background-image:
+                radial-gradient(rgba(99, 102, 241, 0.08) 1px, transparent 1px),
+                radial-gradient(rgba(14, 165, 233, 0.04) 1px, transparent 1px);
+            background-size: 32px 32px, 64px 64px;
+        }
+
+        /* Clean modern surface for Light Mode */
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+            background-image:
+                radial-gradient(rgba(100, 116, 139, 0.08) 1px, transparent 1px);
+            background-size: 28px 28px;
+        }
+
+        /* Glass Panel Styling for both modes */
+        .glass-card {
+            transition: all 0.2s ease;
+        }
+
+        .dark .glass-card {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Input Controls */
+        .input-box {
+            transition: all 0.15s ease;
+        }
+
+        .dark .input-box {
+            background-color: rgba(10, 15, 28, 0.8) !important;
+            border-color: rgba(255, 255, 255, 0.12) !important;
+            color: #ffffff !important;
+        }
+
+        .dark .input-box:focus {
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
+        }
+
+        .input-box {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+
+        .input-box:focus {
+            border-color: #4f46e5 !important;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15) !important;
+        }
+
+        /* Tab Active States */
+        .tab-btn.active {
+            background-color: #4f46e5 !important;
+            color: #ffffff !important;
+            border-color: #4f46e5 !important;
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3) !important;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 9999px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2.5 pointer-events-none"></div>
+
+    <!-- ========================================================================= -->
+    <!-- HEADER BAR -->
+    <!-- ========================================================================= -->
+    <header class="glass-card mx-4 md:mx-8 mt-4 px-6 py-3.5 rounded-2xl sticky top-4 z-50">
+        <div class="flex items-center justify-between gap-4">
+
+            <!-- Logo & Title -->
+            <div class="flex items-center gap-3">
+                <div
+                    class="h-10 w-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/30 font-extrabold text-lg">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span
+                            class="text-lg font-black tracking-tight text-slate-900 dark:text-white">MarginShield</span>
+                        <span
+                            class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/20 uppercase tracking-wider">Production</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Smart Pricing &amp; Fraud
+                        Protection</p>
+                </div>
+            </div>
+
+            <!-- Status Badges (Clean & Minimal) -->
+            <div class="hidden lg:flex items-center gap-2 text-xs">
+                <span
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/20 font-medium">
+                    <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    AI Sentinel Active
+                </span>
+                <span
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/20 font-medium">
+                    <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
+                    Floor Guardrail On
+                </span>
+            </div>
+
+            <!-- Controls (Theme Toggle, Reset, Refresh) -->
+            <div class="flex items-center gap-2">
+
+                <!-- Theme Toggle Button -->
+                <button onclick="toggleTheme()" id="themeToggleBtn" title="Switch between Dark and Light mode"
+                    class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 transition-colors flex items-center gap-1.5 text-xs font-semibold">
+                    <svg id="themeIconSun" class="w-4 h-4 text-amber-500 hidden dark:block" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <svg id="themeIconMoon" class="w-4 h-4 text-indigo-600 block dark:hidden" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                    <span class="hidden sm:inline" id="themeText">Light</span>
+                </button>
+
+                <!-- Sound FX Toggle -->
+                <button onclick="toggleSound()" title="Audio feedback"
+                    class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 transition-colors text-xs flex items-center justify-center">
+                    <svg id="soundIconOn" class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15.536 8.464a5 5 0 010 7.072M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    </svg>
+                    <svg id="soundIconOff" class="w-4 h-4 text-slate-400 hidden" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                    </svg>
+                </button>
+
+                <!-- Sync / Refresh Data -->
+                <button onclick="refreshAllData(true)" title="Sync latest data"
+                    class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 transition-colors text-xs flex items-center justify-center">
+                    <svg id="syncIcon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </button>
+
+                <!-- Reset Store Sample Data Button -->
+                <button onclick="resetStoreData()" title="Reload standard catalog data"
+                    class="px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-600/20 dark:hover:bg-indigo-600/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 text-xs font-semibold transition-colors flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <span class="hidden sm:inline">Reset Catalog</span>
+                </button>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- ========================================================================= -->
+    <!-- METRICS OVERVIEW STRIP (MINIMAL & CLEAR) -->
+    <!-- ========================================================================= -->
+    <section class="mx-4 md:mx-8 mt-5 grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+
+        <!-- Metric 1: Products -->
+        <div class="glass-card p-4 rounded-xl">
+            <span
+                class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Tracked
+                Products</span>
+            <div class="flex items-baseline gap-2 mt-1">
+                <span class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white font-mono"
+                    id="stat-products">--</span>
+                <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400" id="stat-floor-rate">--%
+                    protected</span>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1" id="stat-floors-count">-- with minimum price
+                guard</p>
+        </div>
+
+        <!-- Metric 2: Profit Saved -->
+        <div class="glass-card p-4 rounded-xl">
+            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Margin
+                Saved</span>
+            <div class="flex items-baseline gap-2 mt-1">
+                <span class="text-2xl md:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono"
+                    id="stat-margin-saved">₹--</span>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Protected from below-cost drops</p>
+        </div>
+
+        <!-- Metric 3: Orders Screened -->
+        <div class="glass-card p-4 rounded-xl">
+            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Orders
+                Screened</span>
+            <div class="flex items-baseline gap-2 mt-1">
+                <span class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white font-mono"
+                    id="stat-transactions">--</span>
+                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Total</span>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Store avg cart: ₹1,500</p>
+        </div>
+
+        <!-- Metric 4: Fraud Blocked -->
+        <div class="glass-card p-4 rounded-xl">
+            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">High
+                Risk Blocked</span>
+            <div class="flex items-baseline gap-2 mt-1">
+                <span class="text-2xl md:text-3xl font-extrabold text-rose-600 dark:text-rose-400 font-mono"
+                    id="stat-fraud-count">--</span>
+                <span class="text-xs font-semibold text-rose-600 dark:text-rose-400" id="stat-fraud-rate">--%</span>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-mono" id="stat-fraud-amount">₹-- blocked
+            </p>
+        </div>
+
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- MAIN NAVIGATION TABS -->
+    <!-- ========================================================================= -->
+    <div
+        class="mx-4 md:mx-8 mt-5 flex items-center gap-2 border-b border-slate-200 dark:border-white/10 pb-3 overflow-x-auto">
+        <button onclick="switchTab('pricing')" id="tab-btn-pricing"
+            class="tab-btn active px-4 py-2 rounded-xl text-xs font-bold border border-transparent transition-all flex items-center gap-2 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300">
+            <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+            <span>Price Optimizer</span>
+            <span
+                class="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-indigo-100 dark:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300"
+                id="badge-products-count">0</span>
+        </button>
+
+        <button onclick="switchTab('fraud')" id="tab-btn-fraud"
+            class="tab-btn px-4 py-2 rounded-xl text-xs font-bold border border-transparent transition-all flex items-center gap-2 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300">
+            <svg class="w-4 h-4 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span>Fraud Detection</span>
+            <span
+                class="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-rose-100 dark:bg-rose-500/20 text-rose-800 dark:text-rose-300"
+                id="badge-threats-count">0</span>
+        </button>
+
+        <button onclick="switchTab('analytics')" id="tab-btn-analytics"
+            class="tab-btn px-4 py-2 rounded-xl text-xs font-bold border border-transparent transition-all flex items-center gap-2 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300">
+            <svg class="w-4 h-4 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <span>Analytics</span>
+        </button>
+
+        <button onclick="switchTab('api')" id="tab-btn-api"
+            class="tab-btn px-4 py-2 rounded-xl text-xs font-bold border border-transparent transition-all flex items-center gap-2 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300">
+            <svg class="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+            </svg>
+            <span>API Integration</span>
+        </button>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- CONTENT AREA -->
+    <!-- ========================================================================= -->
+    <main class="flex-1 p-4 md:p-8 max-w-[1600px] mx-auto w-full">
+
+        <!-- ===================================================================== -->
+        <!-- TAB 1: PRICE OPTIMIZER -->
+        <!-- ===================================================================== -->
+        <div id="tab-content-pricing" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Left: Add / Update Product Form -->
+            <div class="lg:col-span-5 space-y-4">
+                <div class="glass-card p-6 rounded-2xl">
+
+                    <div class="mb-5 pb-3 border-b border-slate-200 dark:border-white/10">
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Calculate Optimal Price</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            Undercuts competitors by 1% while protecting your minimum profit margin.
+                        </p>
+                    </div>
+
+                    <!-- Quick Fill Product Templates -->
+                    <div class="mb-4">
+                        <label
+                            class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Load
+                            Template</label>
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <button type="button" onclick="loadProductTemplate('headphones')"
+                                class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-left text-xs font-semibold text-slate-800 dark:text-slate-200 transition-colors">
+                                🎧 ANC Headphones
+                            </button>
+                            <button type="button" onclick="loadProductTemplate('keyboard')"
+                                class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-left text-xs font-semibold text-slate-800 dark:text-slate-200 transition-colors">
+                                ⌨️ Gaming Keyboard
+                            </button>
+                            <button type="button" onclick="loadProductTemplate('tshirt')"
+                                class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-left text-xs font-semibold text-slate-800 dark:text-slate-200 transition-colors">
+                                👕 Cotton T-Shirt
+                            </button>
+                            <button type="button" onclick="loadProductTemplate('smartwatch')"
+                                class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-left text-xs font-semibold text-slate-800 dark:text-slate-200 transition-colors">
+                                ⌚ Smartwatch
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Input Form -->
+                    <form onsubmit="event.preventDefault(); submitPricing();" class="space-y-3.5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">SKU
+                                    ID</label>
+                                <input type="text" id="p_sku" value="HRS-ANC-PRO" required
+                                    class="input-box w-full rounded-xl px-3.5 py-2.5 text-xs font-mono outline-none"
+                                    placeholder="e.g. SKU-101">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Product
+                                    Name</label>
+                                <input type="text" id="p_name" value="AeroSound ANC Pro Headphones" required
+                                    class="input-box w-full rounded-xl px-3.5 py-2.5 text-xs outline-none"
+                                    placeholder="Item name">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Base
+                                    Price (₹)</label>
+                                <input type="number" id="p_base" value="5499" min="1" step="any" required
+                                    oninput="calculateLiveMathPreview()"
+                                    class="input-box w-full rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-1">Floor
+                                    Price (₹)</label>
+                                <input type="number" id="p_floor" value="4200" min="1" step="any" required
+                                    oninput="calculateLiveMathPreview()"
+                                    class="input-box w-full rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400 outline-none">
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400">Minimum allowed
+                                    price</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Competitor
+                                Prices (₹)</label>
+                            <input type="text" id="p_competitors" value="4599, 4399, 4750" required
+                                oninput="calculateLiveMathPreview()"
+                                class="input-box w-full rounded-xl px-3.5 py-2.5 text-xs font-mono outline-none"
+                                placeholder="e.g. 4500, 4300, 4800">
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400">Enter competitor prices
+                                separated by commas</span>
+                        </div>
+
+                        <!-- Live Calculation Preview -->
+                        <div
+                            class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 space-y-1.5">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="font-bold text-slate-600 dark:text-slate-400">Calculation Preview</span>
+                                <span id="math-badge"
+                                    class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300">Optimal</span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2 pt-1 text-center font-mono">
+                                <div>
+                                    <span class="text-[10px] text-slate-500 block">Lowest Comp</span>
+                                    <span class="text-xs font-bold text-slate-800 dark:text-slate-200"
+                                        id="preview-comp">₹--</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500 block">Target (-1%)</span>
+                                    <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400"
+                                        id="preview-target">₹--</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500 block">Final Price</span>
+                                    <span class="text-sm font-black text-slate-900 dark:text-white"
+                                        id="preview-final">₹--</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" id="btn-save-price"
+                            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 text-xs">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span id="btn-save-price-text">Save &amp; Apply Optimal Price</span>
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+
+            <!-- Right: Product Catalog Table/List -->
+            <div class="lg:col-span-7 space-y-4">
+                <div class="glass-card rounded-2xl overflow-hidden flex flex-col min-h-[520px]">
+
+                    <!-- Search & Controls Header -->
+                    <div
+                        class="p-4 border-b border-slate-200 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900 dark:text-white">Product Catalog</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Live active prices protecting store
+                                margins.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="catalog-search" oninput="renderProductCards()"
+                                placeholder="Search product..."
+                                class="input-box text-xs rounded-xl px-3 py-1.5 w-36 sm:w-44 outline-none">
+                            <select id="catalog-filter" onchange="renderProductCards()"
+                                class="input-box text-xs rounded-xl px-2 py-1.5 outline-none font-semibold">
+                                <option value="all">All</option>
+                                <option value="floor">Floor Enforced</option>
+                                <option value="optimal">Market Undercut</option>
+                            </select>
+                            <button onclick="exportCatalogCSV()" title="Export CSV"
+                                class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors text-xs">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Products Container -->
+                    <div class="p-4 flex-1 overflow-y-auto space-y-3" id="products-list-container">
+                        <div class="text-center py-16 text-slate-400 text-xs">
+                            Loading products...
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===================================================================== -->
+        <!-- TAB 2: FRAUD DETECTION -->
+        <!-- ===================================================================== -->
+        <div id="tab-content-fraud" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Left: Check Order Safety -->
+            <div class="lg:col-span-5 space-y-4">
+                <div class="glass-card p-6 rounded-2xl">
+
+                    <div class="mb-5 pb-3 border-b border-slate-200 dark:border-white/10">
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Check Order Safety</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            Detects unusually high cart checkouts using statistical anomaly detection &amp; AI.
+                        </p>
+                    </div>
+
+                    <!-- Test Amount Pills -->
+                    <div class="mb-4">
+                        <label
+                            class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Quick
+                            Test Orders</label>
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <button type="button" onclick="loadFraudTest('normal')"
+                                class="p-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 text-left text-xs font-semibold transition-colors">
+                                🟢 Normal: ₹1,650
+                            </button>
+                            <button type="button" onclick="loadFraudTest('elevated')"
+                                class="p-2 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 text-amber-800 dark:text-amber-300 text-left text-xs font-semibold transition-colors">
+                                🟡 High: ₹2,350
+                            </button>
+                            <button type="button" onclick="loadFraudTest('high')"
+                                class="p-2 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 text-rose-800 dark:text-rose-300 text-left text-xs font-semibold transition-colors">
+                                🔴 Suspicious: ₹18,500
+                            </button>
+                            <button type="button" onclick="loadFraudTest('critical')"
+                                class="p-2 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 text-rose-800 dark:text-rose-300 text-left text-xs font-semibold transition-colors">
+                                🚨 Extreme: ₹85,000
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Form -->
+                    <form onsubmit="event.preventDefault(); submitFraudCheck();" class="space-y-3.5">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Order Amount
+                                (₹)</label>
+                            <input type="number" id="f_amount" value="85000" min="1" step="any" required
+                                oninput="updateBellCurveVisual()"
+                                class="input-box w-full rounded-xl px-3.5 py-2.5 text-base font-mono font-black outline-none">
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400">Store average is ₹1,500</span>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Customer IP
+                                Address</label>
+                            <input type="text" id="f_ip" value="185.220.101.42" required
+                                class="input-box w-full rounded-xl px-3.5 py-2.5 text-xs font-mono outline-none"
+                                placeholder="e.g. 192.168.1.1">
+                        </div>
+
+                        <!-- Gaussian Bell Curve Visualizer -->
+                        <div
+                            class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 space-y-2">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="font-bold text-slate-600 dark:text-slate-400">Risk Curve</span>
+                                <span id="f-zscore-display"
+                                    class="font-mono text-xs font-bold text-rose-600 dark:text-rose-400">Z:
+                                    +278.3σ</span>
+                            </div>
+                            <div
+                                class="w-full h-[120px] bg-white dark:bg-slate-950 rounded-lg overflow-hidden flex items-center justify-center border border-slate-200 dark:border-white/5">
+                                <canvas id="bellCurveCanvas" width="400" height="120"></canvas>
+                            </div>
+                            <div class="flex items-center justify-between text-[10px] font-mono text-slate-500 pt-0.5">
+                                <span>Normal (&le; ₹2,400)</span>
+                                <span class="text-rose-600 dark:text-rose-400 font-bold">Unusual High (&gt;
+                                    ₹2,400)</span>
+                            </div>
+                        </div>
+
+                        <!-- Check Button -->
+                        <button type="submit" id="btn-check-fraud"
+                            class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-4 rounded-xl shadow-md shadow-rose-600/20 transition-all flex items-center justify-center gap-2 text-xs">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                            <span id="btn-check-fraud-text">Analyze Order Safety</span>
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+
+            <!-- Right: Activity Logs -->
+            <div class="lg:col-span-7 space-y-4">
+                <div class="glass-card rounded-2xl overflow-hidden flex flex-col min-h-[520px]">
+
+                    <div
+                        class="p-4 border-b border-slate-200 dark:border-white/10 flex items-center justify-between gap-3">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900 dark:text-white">Order Activity Log</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Live feed of scanned orders and AI
+                                risk assessments.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <select id="log-filter" onchange="renderThreatLogs()"
+                                class="input-box text-xs rounded-xl px-2 py-1.5 outline-none font-semibold">
+                                <option value="all">All Orders</option>
+                                <option value="fraud">Flagged Only</option>
+                                <option value="safe">Cleared Only</option>
+                            </select>
+                            <button onclick="exportThreatLogsCSV()" title="Export CSV"
+                                class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors text-xs">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                            </button>
+                            <button onclick="clearTransactionLogs()" title="Clear logs"
+                                class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-100 dark:bg-slate-800 dark:hover:bg-rose-950/40 text-slate-600 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 text-xs font-semibold transition-colors">
+                                Clear Log
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="p-4 flex-1 overflow-y-auto space-y-3" id="threat-logs-container">
+                        <div class="text-center py-16 text-slate-400 text-xs">
+                            Loading activity log...
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===================================================================== -->
+        <!-- TAB 3: ANALYTICS -->
+        <!-- ===================================================================== -->
+        <div id="tab-content-analytics" class="hidden space-y-5">
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+                <!-- Chart 1: Catalog Price Comparison -->
+                <div class="lg:col-span-8 glass-card p-5 rounded-2xl">
+                    <div
+                        class="flex items-center justify-between mb-3 pb-2 border-b border-slate-200 dark:border-white/10">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-white">Product Price Comparison</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Base vs Floor vs Competitor vs
+                                Optimized Price.</p>
+                        </div>
+                        <span class="text-xs font-mono font-bold text-slate-500">INR (₹)</span>
+                    </div>
+                    <div class="h-[280px] w-full">
+                        <canvas id="pricingChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Floor Protection Ratio -->
+                <div class="lg:col-span-4 glass-card p-5 rounded-2xl">
+                    <div
+                        class="flex items-center justify-between mb-3 pb-2 border-b border-slate-200 dark:border-white/10">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-white">Floor Protection Ratio</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">% of items protected by price floor.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="h-[220px] w-full flex items-center justify-center">
+                        <canvas id="floorDoughnutChart"></canvas>
+                    </div>
+                    <div
+                        class="grid grid-cols-2 gap-2 mt-3 pt-2 border-t border-slate-100 dark:border-white/5 text-center text-xs">
+                        <div class="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300">
+                            <span class="block text-[10px] text-slate-500">Floor Protected</span>
+                            <span class="font-bold" id="stat-chart-floor">--</span>
+                        </div>
+                        <div
+                            class="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+                            <span class="block text-[10px] text-slate-500">Market Matched</span>
+                            <span class="font-bold" id="stat-chart-optimal">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart 3: Order Risk Scatter -->
+                <div class="lg:col-span-12 glass-card p-5 rounded-2xl">
+                    <div
+                        class="flex items-center justify-between mb-3 pb-2 border-b border-slate-200 dark:border-white/10">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-white">Order Risk Distribution</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Order Z-Scores compared to the 3.0σ
+                                risk threshold.</p>
+                        </div>
+                        <span class="text-xs font-mono font-bold text-rose-600 dark:text-rose-400">Threshold:
+                            3.0σ</span>
+                    </div>
+                    <div class="h-[240px] w-full">
+                        <canvas id="fraudScatterChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ===================================================================== -->
+        <!-- TAB 4: API INTEGRATION -->
+        <!-- ===================================================================== -->
+        <div id="tab-content-api" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Left: Request Sender -->
+            <div class="lg:col-span-6 glass-card p-6 rounded-2xl space-y-4">
+                <div class="pb-3 border-b border-slate-200 dark:border-white/10">
+                    <h2 class="text-lg font-bold text-slate-900 dark:text-white">Test REST API</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Dispatch live requests to test
+                        integration.</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" onclick="selectEndpoint('pricing')" id="ep-btn-pricing"
+                        class="p-2.5 rounded-xl border border-indigo-500 bg-indigo-50 dark:bg-indigo-500/20 text-left text-xs font-bold text-indigo-700 dark:text-white">
+                        <span class="font-mono text-[10px] text-indigo-500">POST</span>
+                        <p class="font-mono text-[11px] mt-0.5">/api/pricing/optimize</p>
+                    </button>
+                    <button type="button" onclick="selectEndpoint('fraud')" id="ep-btn-fraud"
+                        class="p-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-left text-xs font-bold text-slate-600 dark:text-slate-400">
+                        <span class="font-mono text-[10px] text-rose-500">POST</span>
+                        <p class="font-mono text-[11px] mt-0.5">/api/transactions/analyze</p>
+                    </button>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Request JSON</label>
+                    <textarea id="api-payload" rows="7"
+                        class="input-box w-full rounded-xl p-3 font-mono text-xs outline-none leading-relaxed"></textarea>
+                </div>
+
+                <button onclick="sendApiTestRequest()"
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md shadow-indigo-600/20 transition-all text-xs flex items-center justify-center gap-2">
+                    <span>Send Test Request</span>
+                </button>
+            </div>
+
+            <!-- Right: Response & Code Snippets -->
+            <div class="lg:col-span-6 glass-card p-6 rounded-2xl space-y-4">
+                <div class="pb-3 border-b border-slate-200 dark:border-white/10 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Response &amp; Snippets</h2>
+                    </div>
+                    <span id="api-status-tag"
+                        class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                        Ready
+                    </span>
+                </div>
+
+                <div>
+                    <span class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Live Response</span>
+                    <pre id="api-response"
+                        class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/10 font-mono text-xs text-emerald-600 dark:text-emerald-400 overflow-x-auto max-h-[160px]">// Click 'Send Test Request' to view output</pre>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs font-bold text-slate-700 dark:text-slate-300">Integration Code</span>
+                        <div class="flex items-center gap-1">
+                            <button onclick="setLang('curl')" id="btn-lang-curl"
+                                class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-600 text-white">cURL</button>
+                            <button onclick="setLang('python')" id="btn-lang-python"
+                                class="px-2 py-0.5 rounded text-[10px] font-mono text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">Python</button>
+                            <button onclick="setLang('js')" id="btn-lang-js"
+                                class="px-2 py-0.5 rounded text-[10px] font-mono text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">JavaScript</button>
+                        </div>
+                    </div>
+                    <pre id="api-code-snippet"
+                        class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/10 font-mono text-[11px] text-slate-800 dark:text-slate-300 overflow-x-auto max-h-[140px] leading-relaxed"></pre>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- ========================================================================= -->
+    <!-- FOOTER -->
+    <!-- ========================================================================= -->
+    <footer
+        class="mx-4 md:mx-8 mb-5 mt-8 pt-4 border-t border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2">
+        <div class="flex items-center gap-2">
+            <span class="font-bold text-slate-700 dark:text-slate-300">MarginShield</span>
+            <span>&bull;</span>
+            <span>Production &amp; Academic Edition</span>
+            <span>&bull;</span>
+            <span class="text-emerald-600 dark:text-emerald-400 font-medium">System Online</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="/docs" target="_blank" class="hover:text-indigo-600 dark:hover:text-indigo-400">API
+                Documentation</a>
+            <a href="/health" target="_blank" class="hover:text-indigo-600 dark:hover:text-indigo-400">Health Check</a>
+        </div>
+    </footer>
+
+    <!-- ========================================================================= -->
+    <!-- JAVASCRIPT LOGIC -->
+    <!-- ========================================================================= -->
+    <script>
+        // Use current domain/origin dynamically (works on localhost, LAN IP, and production cloud hosts)
+        const API_BASE = (window.location.origin && window.location.origin.startsWith('http')) 
+            ? window.location.origin 
+            : '';
+
+        let appState = {
+            products: [],
+            transactions: [],
+            stats: null,
+            soundEnabled: true,
+            theme: 'dark',
+            activeTab: 'pricing',
+            activeEndpoint: 'pricing',
+            codeLang: 'curl',
+            charts: {
+                pricing: null,
+                floorDoughnut: null,
+                fraudScatter: null
+            }
+        };
+
+        // Web Audio Synthesizer
+        const audioCtx = (typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext))
+            ? new (window.AudioContext || window.webkitAudioContext)()
+            : null;
+
+        function playSound(type) {
+            if (!appState.soundEnabled || !audioCtx) return;
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                if (type === 'success') {
+                    osc.frequency.setValueAtTime(587.33, now);
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.12);
+                    gain.gain.setValueAtTime(0.06, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.start(now); osc.stop(now + 0.2);
+                } else if (type === 'alert') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(750, now);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.start(now); osc.stop(now + 0.25);
+                } else {
+                    osc.frequency.setValueAtTime(1100, now);
+                    gain.gain.setValueAtTime(0.02, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.start(now); osc.stop(now + 0.04);
+                }
+            } catch (e) { }
+        }
+
+        // Theme Toggle (Dark & Light Mode)
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+                document.documentElement.classList.remove('dark');
+                appState.theme = 'light';
+                localStorage.setItem('marginshield_theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                appState.theme = 'dark';
+                localStorage.setItem('marginshield_theme', 'dark');
+            }
+            updateThemeUI();
+            updateBellCurveVisual();
+            if (appState.activeTab === 'analytics') {
+                renderAnalyticsCharts();
+            }
+            playSound('click');
+        }
+
+        function initTheme() {
+            const saved = localStorage.getItem('marginshield_theme');
+            if (saved === 'light') {
+                document.documentElement.classList.remove('dark');
+                appState.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                appState.theme = 'dark';
+            }
+            updateThemeUI();
+        }
+
+        function updateThemeUI() {
+            const isDark = document.documentElement.classList.contains('dark');
+            document.getElementById('themeText').textContent = isDark ? 'Light Mode' : 'Dark Mode';
+        }
+
+        function toggleSound() {
+            appState.soundEnabled = !appState.soundEnabled;
+            document.getElementById('soundIconOn').classList.toggle('hidden', !appState.soundEnabled);
+            document.getElementById('soundIconOff').classList.toggle('hidden', appState.soundEnabled);
+            showToast(appState.soundEnabled ? 'Sound Enabled' : 'Sound Muted', 'info');
+        }
+
+        // Toast Notifications (Minimal & Clean)
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+
+            let bgClass = 'bg-white text-slate-800 border-slate-200 dark:bg-slate-900 dark:text-slate-100 dark:border-white/10';
+            if (type === 'success') {
+                bgClass = 'bg-emerald-600 text-white border-emerald-500 shadow-emerald-950/20';
+            } else if (type === 'error' || type === 'fraud') {
+                bgClass = 'bg-rose-600 text-white border-rose-500 shadow-rose-950/20';
+            }
+
+            toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-2.5 rounded-xl border ${bgClass} shadow-lg transition-all duration-200 text-xs font-semibold max-w-sm`;
+            toast.innerHTML = `<span class="flex-1">${message}</span><button onclick="this.parentElement.remove()" class="opacity-70 hover:opacity-100 font-bold">&times;</button>`;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-x-2');
+                setTimeout(() => toast.remove(), 250);
+            }, 3500);
+        }
+
+        // Tab Switching
+        function switchTab(tabId) {
+            playSound('click');
+            appState.activeTab = tabId;
+            ['pricing', 'fraud', 'analytics', 'api'].forEach(t => {
+                const btn = document.getElementById(`tab-btn-${t}`);
+                const content = document.getElementById(`tab-content-${t}`);
+                if (t === tabId) {
+                    btn.classList.add('active');
+                    content.classList.remove('hidden');
+                } else {
+                    btn.classList.remove('active');
+                    content.classList.add('hidden');
+                }
+            });
+
+            if (tabId === 'analytics') renderAnalyticsCharts();
+            if (tabId === 'fraud') updateBellCurveVisual();
+            if (tabId === 'api') updateApiCodeSnippet();
+        }
+
+        // Data Sync
+        async function fetchJson(endpoint, options = {}) {
+            const res = await fetch(`${API_BASE}${endpoint}`, options);
+            if (!res.ok) {
+                let errText = res.statusText;
+                try {
+                    const data = await res.json();
+                    if (data.detail) errText = Array.isArray(data.detail) ? data.detail.map(d => d.msg).join(', ') : data.detail;
+                } catch (_) { }
+                throw new Error(errText);
+            }
+            return await res.json();
+        }
+
+        async function refreshAllData(notify = false) {
+            const icon = document.getElementById('syncIcon');
+            icon.classList.add('animate-spin');
+
+            try {
+                const [stats, pricing, transactions] = await Promise.all([
+                    fetchJson('/api/stats'),
+                    fetchJson('/api/pricing'),
+                    fetchJson('/api/transactions')
+                ]);
+
+                appState.stats = stats;
+                appState.products = pricing;
+                appState.transactions = transactions;
+
+                updateStatsStrip();
+                renderProductCards();
+                renderThreatLogs();
+
+                if (appState.activeTab === 'analytics') renderAnalyticsCharts();
+                if (notify) {
+                    playSound('success');
+                    showToast('Data refreshed', 'success');
+                }
+            } catch (err) {
+                console.error(err);
+                if (notify) showToast(`Refresh failed: ${err.message}`, 'error');
+            } finally {
+                setTimeout(() => icon.classList.remove('animate-spin'), 500);
+            }
+        }
+
+        function updateStatsStrip() {
+            if (!appState.stats) return;
+            const s = appState.stats;
+
+            document.getElementById('stat-products').textContent = s.total_products;
+            document.getElementById('stat-floor-rate').textContent = `${s.floor_enforcement_rate}% protected`;
+            document.getElementById('stat-floors-count').textContent = `${s.floors_enforced} with price floor`;
+            document.getElementById('stat-margin-saved').textContent = `₹${s.margin_protected_rupees.toLocaleString('en-IN')}`;
+
+            document.getElementById('stat-transactions').textContent = s.total_transactions;
+            document.getElementById('stat-fraud-count').textContent = s.fraud_count;
+            document.getElementById('stat-fraud-rate').textContent = `${s.fraud_rate}%`;
+            document.getElementById('stat-fraud-amount').textContent = `₹${s.total_fraud_blocked_amount.toLocaleString('en-IN')} blocked`;
+
+            document.getElementById('badge-products-count').textContent = s.total_products;
+            document.getElementById('badge-threats-count').textContent = s.fraud_count;
+        }
+
+        // =========================================================================
+        // PRICING TAB
+        // =========================================================================
+
+        const PRODUCT_TEMPLATES = {
+            headphones: { sku: 'HRS-ANC-PRO', name: 'AeroSound ANC Pro Headphones', base: 5499, floor: 4200, comp: '4599, 4399, 4750' },
+            keyboard: { sku: 'HRS-KB-RGB', name: 'Apex Mechanical RGB Keyboard', base: 3299, floor: 2850, comp: '2800, 2999, 3150' },
+            tshirt: { sku: 'HRS-TSHIRT-01', name: 'Signature Cotton Tee', base: 899, floor: 650, comp: '850, 799, 620' },
+            smartwatch: { sku: 'HRS-WATCH-GT', name: 'Vanguard AMOLED Smartwatch', base: 12999, floor: 9800, comp: '11499, 11800, 12200' }
+        };
+
+        function loadProductTemplate(key) {
+            playSound('click');
+            const item = PRODUCT_TEMPLATES[key];
+            if (!item) return;
+            document.getElementById('p_sku').value = item.sku;
+            document.getElementById('p_name').value = item.name;
+            document.getElementById('p_base').value = item.base;
+            document.getElementById('p_floor').value = item.floor;
+            document.getElementById('p_competitors').value = item.comp;
+            calculateLiveMathPreview();
+            showToast(`Loaded ${item.name}`, 'info');
+        }
+
+        function calculateLiveMathPreview() {
+            const base = parseFloat(document.getElementById('p_base').value) || 0;
+            const floor = parseFloat(document.getElementById('p_floor').value) || 0;
+            const compStr = document.getElementById('p_competitors').value;
+            const comps = compStr.split(',').map(v => parseFloat(v.trim())).filter(n => Number.isFinite(n) && n > 0);
+
+            if (comps.length === 0 || base <= 0 || floor <= 0) {
+                document.getElementById('preview-comp').textContent = '₹--';
+                document.getElementById('preview-target').textContent = '₹--';
+                document.getElementById('preview-final').textContent = '₹--';
+                return;
+            }
+
+            const lowest = Math.min(...comps);
+            const target = Math.round(lowest * 0.99 * 100) / 100;
+            const finalPrice = Math.max(target, floor);
+            const isFloorHit = target < floor;
+
+            document.getElementById('preview-comp').textContent = `₹${lowest.toLocaleString('en-IN')}`;
+            document.getElementById('preview-target').textContent = `₹${target.toLocaleString('en-IN')}`;
+            document.getElementById('preview-final').textContent = `₹${finalPrice.toLocaleString('en-IN')}`;
+
+            const badge = document.getElementById('math-badge');
+            if (isFloorHit) {
+                badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 dark:bg-rose-500/20 text-rose-800 dark:text-rose-300';
+                badge.textContent = 'Floor Protected';
+            } else {
+                badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300';
+                badge.textContent = 'Market Matched (-1%)';
+            }
+        }
+
+        async function submitPricing() {
+            const btn = document.getElementById('btn-save-price');
+            const btnText = document.getElementById('btn-save-price-text');
+            btnText.textContent = 'Saving...';
+            btn.disabled = true;
+
+            const sku = document.getElementById('p_sku').value.trim();
+            const name = document.getElementById('p_name').value.trim();
+            const base = parseFloat(document.getElementById('p_base').value);
+            const floor = parseFloat(document.getElementById('p_floor').value);
+            const compRaw = document.getElementById('p_competitors').value;
+            const comps = compRaw.split(',').map(s => parseFloat(s.trim())).filter(n => Number.isFinite(n) && n > 0);
+
+            try {
+                const res = await fetchJson('/api/pricing/optimize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sku: sku,
+                        product_name: name,
+                        base_price: base,
+                        minimum_allowed_price: floor,
+                        competitor_prices: comps
+                    })
+                });
+
+                playSound('success');
+                showToast(res.floor_applied ? `Floor Protected: ₹${res.optimized_price.toLocaleString('en-IN')}` : `Optimal Price: ₹${res.optimized_price.toLocaleString('en-IN')}`, 'success');
+                await refreshAllData(false);
+            } catch (err) {
+                playSound('alert');
+                showToast(`Error: ${err.message}`, 'error');
+            } finally {
+                btnText.textContent = 'Save & Apply Optimal Price';
+                btn.disabled = false;
+            }
+        }
+
+        async function deleteProduct(sku) {
+            playSound('click');
+            if (!confirm(`Delete SKU ${sku}?`)) return;
+            try {
+                await fetchJson(`/api/pricing/${encodeURIComponent(sku)}`, { method: 'DELETE' });
+                showToast(`SKU ${sku} removed`, 'info');
+                await refreshAllData(false);
+            } catch (err) {
+                showToast(`Delete failed: ${err.message}`, 'error');
+            }
+        }
+
+        function renderProductCards() {
+            const container = document.getElementById('products-list-container');
+            const search = (document.getElementById('catalog-search')?.value || '').toLowerCase().trim();
+            const filter = document.getElementById('catalog-filter')?.value || 'all';
+
+            let items = appState.products || [];
+            if (search) items = items.filter(p => p.sku.toLowerCase().includes(search) || p.product_name.toLowerCase().includes(search));
+            if (filter === 'floor') items = items.filter(p => p.floor_applied);
+            if (filter === 'optimal') items = items.filter(p => !p.floor_applied);
+
+            if (items.length === 0) {
+                container.innerHTML = `<div class="text-center py-14 text-slate-400 text-xs">No products found.</div>`;
+                return;
+            }
+
+            container.innerHTML = items.map(p => {
+                const isFloor = p.floor_applied;
+                const statusBadge = isFloor
+                    ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30">Floor Protected</span>`
+                    : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">Optimal (-1%)</span>`;
+
+                return `
+                    <div class="p-3.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/50 hover:border-indigo-400 dark:hover:border-indigo-500/40 transition-colors">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <div>
+                                <span class="font-bold text-slate-900 dark:text-white text-xs">${p.product_name}</span>
+                                <span class="font-mono text-[10px] text-indigo-600 dark:text-indigo-400 ml-1.5">${p.sku}</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                ${statusBadge}
+                                <button onclick="deleteProduct('${p.sku}')" title="Delete SKU" class="p-1 rounded text-slate-400 hover:text-rose-600 dark:hover:text-rose-400">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-white/5 text-[11px] font-mono">
+                            <div>
+                                <span class="text-[9px] text-slate-400 uppercase font-sans block">Base</span>
+                                <span class="text-slate-700 dark:text-slate-300">₹${p.base_price.toLocaleString('en-IN')}</span>
+                            </div>
+                            <div>
+                                <span class="text-[9px] text-indigo-500 uppercase font-sans block">Floor</span>
+                                <span class="font-bold text-indigo-600 dark:text-indigo-400">₹${p.minimum_allowed_price.toLocaleString('en-IN')}</span>
+                            </div>
+                            <div>
+                                <span class="text-[9px] text-slate-400 uppercase font-sans block">Lowest Comp</span>
+                                <span class="text-slate-700 dark:text-slate-300">₹${p.lowest_competitor_price.toLocaleString('en-IN')}</span>
+                            </div>
+                            <div>
+                                <span class="text-[9px] text-emerald-600 dark:text-emerald-400 uppercase font-sans block">Optimal Selling</span>
+                                <span class="text-xs font-black text-slate-900 dark:text-white">₹${p.optimized_price.toLocaleString('en-IN')}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function exportCatalogCSV() {
+            playSound('click');
+            if (!appState.products.length) return showToast('No items to export', 'error');
+            const rows = [['SKU', 'Name', 'Base Price', 'Floor Price', 'Lowest Comp', 'Optimized Price', 'Floor Protected']];
+            appState.products.forEach(p => rows.push([`"${p.sku}"`, `"${p.product_name}"`, p.base_price, p.minimum_allowed_price, p.lowest_competitor_price, p.optimized_price, p.floor_applied ? 'Yes' : 'No']));
+            const csv = rows.map(r => r.join(',')).join('\n');
+            downloadFile(csv, 'products.csv', 'text/csv');
+            showToast('Products exported to CSV', 'success');
+        }
+
+        // =========================================================================
+        // FRAUD TAB
+        // =========================================================================
+
+        const FRAUD_TESTS = {
+            normal: { amount: 1650, ip: '49.36.128.91' },
+            elevated: { amount: 2350, ip: '103.241.202.15' },
+            high: { amount: 18500, ip: '194.26.29.112' },
+            critical: { amount: 85000, ip: '185.220.101.42' }
+        };
+
+        function loadFraudTest(key) {
+            playSound('click');
+            const t = FRAUD_TESTS[key];
+            if (!t) return;
+            document.getElementById('f_amount').value = t.amount;
+            document.getElementById('f_ip').value = t.ip;
+            updateBellCurveVisual();
+            showToast(`Loaded test order: ₹${t.amount.toLocaleString('en-IN')}`, 'info');
+        }
+
+        function updateBellCurveVisual() {
+            const amount = parseFloat(document.getElementById('f_amount')?.value) || 0;
+            const z = ((amount - 1500) / 300);
+
+            const zDisp = document.getElementById('f-zscore-display');
+            if (zDisp) {
+                zDisp.textContent = `Z: ${z >= 0 ? '+' : ''}${z.toFixed(1)}σ`;
+                zDisp.className = z > 3.0 ? 'font-mono text-xs font-bold text-rose-600 dark:text-rose-400' : 'font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400';
+            }
+
+            drawBellCurve(z);
+        }
+
+        function drawBellCurve(currentZ) {
+            const canvas = document.getElementById('bellCurveCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+            const isDark = document.documentElement.classList.contains('dark');
+
+            ctx.clearRect(0, 0, w, h);
+
+            const normalPDF = (x) => Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI);
+            const padX = 35;
+            const bottomY = h - 18;
+            const topY = 16;
+            const plotW = w - padX * 2;
+            const maxPDF = normalPDF(0);
+
+            const toX = (z) => padX + ((z - (-4)) / 8) * plotW;
+            const toY = (val) => bottomY - (val / maxPDF) * (bottomY - topY);
+
+            // Baseline axis
+            ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.15)' : '#cbd5e1';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(padX, bottomY);
+            ctx.lineTo(w - padX, bottomY);
+            ctx.stroke();
+
+            // Normal distribution curve
+            ctx.beginPath();
+            ctx.moveTo(toX(-4), bottomY);
+            for (let z = -4; z <= 4; z += 0.1) {
+                ctx.lineTo(toX(z), toY(normalPDF(z)));
+            }
+            ctx.lineTo(toX(4), bottomY);
+            ctx.closePath();
+
+            // Gradient fill
+            const grad = ctx.createLinearGradient(toX(-4), 0, toX(4), 0);
+            grad.addColorStop(0, 'rgba(16, 185, 129, 0.1)');
+            grad.addColorStop(0.7, 'rgba(16, 185, 129, 0.25)');
+            grad.addColorStop(0.88, 'rgba(244, 63, 94, 0.35)');
+            grad.addColorStop(1, 'rgba(244, 63, 94, 0.6)');
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Threshold line at +3.0σ
+            const threshX = toX(3.0);
+            ctx.strokeStyle = '#e11d48';
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(threshX, topY);
+            ctx.lineTo(threshX, bottomY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Marker Dot for Current Z
+            const clampedZ = Math.min(Math.max(currentZ, -3.9), 3.9);
+            const markerX = toX(clampedZ);
+            const markerY = toY(normalPDF(clampedZ));
+            const isFraud = currentZ > 3.0;
+
+            ctx.beginPath();
+            ctx.arc(markerX, markerY, 4.5, 0, Math.PI * 2);
+            ctx.fillStyle = isFraud ? '#e11d48' : '#059669';
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        }
+
+        async function submitFraudCheck() {
+            const btn = document.getElementById('btn-check-fraud');
+            const btnText = document.getElementById('btn-check-fraud-text');
+            btnText.textContent = 'Evaluating...';
+            btn.disabled = true;
+
+            const amount = parseFloat(document.getElementById('f_amount').value);
+            const ip = document.getElementById('f_ip').value.trim();
+
+            try {
+                const res = await fetchJson('/api/transactions/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_ip: ip, cart_value: amount })
+                });
+
+                if (res.is_fraud) {
+                    playSound('alert');
+                    showToast(`High Risk Order Flagged (Z: ${res.z_score}σ)`, 'fraud');
+                } else {
+                    playSound('success');
+                    showToast('Order Verified: Safe to proceed', 'success');
+                }
+
+                await refreshAllData(false);
+            } catch (err) {
+                playSound('alert');
+                showToast(`Check failed: ${err.message}`, 'error');
+            } finally {
+                btnText.textContent = 'Analyze Order Safety';
+                btn.disabled = false;
+            }
+        }
+
+        async function clearTransactionLogs() {
+            playSound('click');
+            if (!confirm('Clear all order logs?')) return;
+            try {
+                await fetchJson('/api/transactions', { method: 'DELETE' });
+                showToast('Activity logs cleared', 'info');
+                await refreshAllData(false);
+            } catch (err) {
+                showToast(`Error: ${err.message}`, 'error');
+            }
+        }
+
+        function renderThreatLogs() {
+            const container = document.getElementById('threat-logs-container');
+            const filter = document.getElementById('log-filter')?.value || 'all';
+
+            let logs = appState.transactions || [];
+            if (filter === 'fraud') logs = logs.filter(l => l.is_fraud);
+            if (filter === 'safe') logs = logs.filter(l => !l.is_fraud);
+
+            if (logs.length === 0) {
+                container.innerHTML = `<div class="text-center py-14 text-slate-400 text-xs">No activity logged.</div>`;
+                return;
+            }
+
+            container.innerHTML = logs.map(tx => {
+                const isFraud = tx.is_fraud;
+                const time = tx.created_at ? new Date(tx.created_at).toLocaleTimeString() : 'Just now';
+
+                if (isFraud) {
+                    return `
+                        <div class="p-3.5 rounded-xl border border-rose-300 dark:border-rose-500/30 bg-rose-50/60 dark:bg-rose-950/20 text-xs">
+                            <div class="flex items-center justify-between gap-2 mb-1.5">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-200 dark:bg-rose-500/30 text-rose-800 dark:text-rose-200">
+                                    Flagged: High Risk (Z: +${tx.z_score.toFixed(1)}σ)
+                                </span>
+                                <span class="font-mono text-[10px] text-slate-500">${time}</span>
+                            </div>
+                            <div class="flex items-baseline justify-between mb-2">
+                                <span class="text-base font-black font-mono text-slate-900 dark:text-white">₹${tx.cart_value.toLocaleString('en-IN')}</span>
+                                <span class="font-mono text-[10px] text-slate-500 bg-white/70 dark:bg-black/30 px-2 py-0.5 rounded border border-slate-200 dark:border-white/5">IP: ${tx.user_ip}</span>
+                            </div>
+                            <p class="text-[11px] text-slate-700 dark:text-slate-300 leading-snug font-medium pt-1 border-t border-rose-200 dark:border-white/5">
+                                ${tx.ai_explanation || "Unusual checkout value far exceeding average store orders."}
+                            </p>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="p-3 rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-900/40 flex items-center justify-between text-xs">
+                            <div class="flex items-center gap-2">
+                                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                                <span class="font-bold text-emerald-700 dark:text-emerald-400">Order Cleared</span>
+                                <span class="font-mono text-[10px] text-slate-400">IP: ${tx.user_ip}</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-mono text-slate-400 text-[10px]">Z: ${tx.z_score.toFixed(2)}σ</span>
+                                <span class="font-bold font-mono text-slate-900 dark:text-white">₹${tx.cart_value.toLocaleString('en-IN')}</span>
+                                <span class="text-[10px] text-slate-400 font-mono">${time}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            }).join('');
+        }
+
+        function exportThreatLogsCSV() {
+            playSound('click');
+            if (!appState.transactions.length) return showToast('No logs to export', 'error');
+            const rows = [['IP', 'Amount (INR)', 'Z-Score', 'Fraud Flagged', 'AI Explanation', 'Timestamp']];
+            appState.transactions.forEach(t => rows.push([`"${t.user_ip}"`, t.cart_value, t.z_score, t.is_fraud ? 'Yes' : 'No', `"${(t.ai_explanation || '').replace(/"/g, '""')}"`, `"${t.created_at}"`]));
+            const csv = rows.map(r => r.join(',')).join('\n');
+            downloadFile(csv, 'order_logs.csv', 'text/csv');
+            showToast('Logs exported to CSV', 'success');
+        }
+
+        // =========================================================================
+        // ANALYTICS TAB (CHART.JS)
+        // =========================================================================
+
+        function renderAnalyticsCharts() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#94a3b8' : '#475569';
+            const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+
+            // Chart 1: Pricing
+            const pCanvas = document.getElementById('pricingChart');
+            if (pCanvas) {
+                const items = (appState.products || []).slice(0, 8);
+                if (appState.charts.pricing) appState.charts.pricing.destroy();
+                appState.charts.pricing = new Chart(pCanvas.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: items.length ? items.map(p => p.sku) : ['No SKUs'],
+                        datasets: [
+                            { label: 'Base', data: items.map(p => p.base_price), backgroundColor: isDark ? '#475569' : '#94a3b8' },
+                            { label: 'Floor', data: items.map(p => p.minimum_allowed_price), backgroundColor: '#6366f1' },
+                            { label: 'Lowest Comp', data: items.map(p => p.lowest_competitor_price), backgroundColor: '#06b6d4' },
+                            { label: 'Optimized', data: items.map(p => p.optimized_price), backgroundColor: '#10b981' }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { labels: { color: textColor, font: { size: 10 } } } },
+                        scales: {
+                            x: { grid: { color: gridColor }, ticks: { color: textColor } },
+                            y: { grid: { color: gridColor }, ticks: { color: textColor } }
+                        }
+                    }
+                });
+            }
+
+            // Chart 2: Floor Doughnut
+            const fCanvas = document.getElementById('floorDoughnutChart');
+            if (fCanvas) {
+                const floors = (appState.products || []).filter(p => p.floor_applied).length;
+                const optimal = (appState.products || []).length - floors;
+                document.getElementById('stat-chart-floor').textContent = `${floors} items`;
+                document.getElementById('stat-chart-optimal').textContent = `${optimal} items`;
+
+                if (appState.charts.floorDoughnut) appState.charts.floorDoughnut.destroy();
+                appState.charts.floorDoughnut = new Chart(fCanvas.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Floor Protected', 'Market Matched'],
+                        datasets: [{
+                            data: [floors, optimal],
+                            backgroundColor: ['#e11d48', '#10b981'],
+                            borderWidth: 2,
+                            borderColor: isDark ? '#0f172a' : '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 11 } } } },
+                        cutout: '68%'
+                    }
+                });
+            }
+
+            // Chart 3: Scatter
+            const sCanvas = document.getElementById('fraudScatterChart');
+            if (sCanvas) {
+                const logs = appState.transactions || [];
+                const safePts = logs.filter(t => !t.is_fraud).map((t, i) => ({ x: i + 1, y: t.z_score }));
+                const fraudPts = logs.filter(t => t.is_fraud).map((t, i) => ({ x: i + 1, y: t.z_score }));
+
+                if (appState.charts.fraudScatter) appState.charts.fraudScatter.destroy();
+                appState.charts.fraudScatter = new Chart(sCanvas.getContext('2d'), {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            { label: 'Safe Orders (<3σ)', data: safePts, backgroundColor: '#10b981', pointRadius: 4 },
+                            { label: 'Blocked (>3σ)', data: fraudPts, backgroundColor: '#e11d48', pointRadius: 6 }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { labels: { color: textColor, font: { size: 10 } } } },
+                        scales: {
+                            x: { grid: { color: gridColor }, ticks: { color: textColor }, title: { display: true, text: 'Order Sequence', color: textColor, font: { size: 10 } } },
+                            y: { grid: { color: gridColor }, ticks: { color: textColor }, title: { display: true, text: 'Z-Score (σ)', color: textColor, font: { size: 10 } } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // =========================================================================
+        // API TAB
+        // =========================================================================
+
+        const API_TEMPLATES = {
+            pricing: {
+                endpoint: '/api/pricing/optimize',
+                body: {
+                    sku: 'PROD-STORE-01',
+                    product_name: 'Wireless Studio Headphones',
+                    base_price: 5999.0,
+                    minimum_allowed_price: 4500.0,
+                    competitor_prices: [5100.0, 4800.0, 5300.0]
+                }
+            },
+            fraud: {
+                endpoint: '/api/transactions/analyze',
+                body: {
+                    user_ip: '185.220.101.42',
+                    cart_value: 85000.0
+                }
+            }
+        };
+
+        function selectEndpoint(key) {
+            playSound('click');
+            appState.activeEndpoint = key;
+            const btnP = document.getElementById('ep-btn-pricing');
+            const btnF = document.getElementById('ep-btn-fraud');
+
+            if (key === 'pricing') {
+                btnP.className = 'p-2.5 rounded-xl border border-indigo-500 bg-indigo-50 dark:bg-indigo-500/20 text-left text-xs font-bold text-indigo-700 dark:text-white';
+                btnF.className = 'p-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-left text-xs font-bold text-slate-600 dark:text-slate-400';
+            } else {
+                btnF.className = 'p-2.5 rounded-xl border border-rose-500 bg-rose-50 dark:bg-rose-500/20 text-left text-xs font-bold text-rose-700 dark:text-white';
+                btnP.className = 'p-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-left text-xs font-bold text-slate-600 dark:text-slate-400';
+            }
+
+            document.getElementById('api-payload').value = JSON.stringify(API_TEMPLATES[key].body, null, 2);
+            updateApiCodeSnippet();
+        }
+
+        async function sendApiTestRequest() {
+            playSound('click');
+            const elPayload = document.getElementById('api-payload');
+            const elResponse = document.getElementById('api-response');
+            const tag = document.getElementById('api-status-tag');
+
+            let body;
+            try {
+                body = JSON.parse(elPayload.value);
+            } catch (e) {
+                showToast('Invalid JSON syntax', 'error');
+                return;
+            }
+
+            const ep = API_TEMPLATES[appState.activeEndpoint].endpoint;
+            tag.textContent = 'Transmitting...';
+            tag.className = 'px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300';
+
+            try {
+                const start = performance.now();
+                const res = await fetch(`${API_BASE}${ep}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const ms = Math.round(performance.now() - start);
+                const data = await res.json();
+
+                tag.textContent = `HTTP ${res.status} OK (${ms}ms)`;
+                tag.className = 'px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300';
+                elResponse.textContent = JSON.stringify(data, null, 2);
+                playSound('success');
+                await refreshAllData(false);
+            } catch (err) {
+                tag.textContent = 'Request Error';
+                tag.className = 'px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300';
+                elResponse.textContent = JSON.stringify({ error: err.message }, null, 2);
+                playSound('alert');
+            }
+        }
+
+        function setLang(lang) {
+            playSound('click');
+            appState.codeLang = lang;
+            ['curl', 'python', 'js'].forEach(l => {
+                const btn = document.getElementById(`btn-lang-${l}`);
+                if (l === lang) {
+                    btn.className = 'px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-600 text-white';
+                } else {
+                    btn.className = 'px-2 py-0.5 rounded text-[10px] font-mono text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white';
+                }
+            });
+            updateApiCodeSnippet();
+        }
+
+        function updateApiCodeSnippet() {
+            const el = document.getElementById('api-code-snippet');
+            const ep = API_TEMPLATES[appState.activeEndpoint].endpoint;
+            const payload = document.getElementById('api-payload')?.value || JSON.stringify(API_TEMPLATES[appState.activeEndpoint].body);
+            const liveOrigin = (window.location.origin && window.location.origin.startsWith('http')) ? window.location.origin : 'https://your-domain.com';
+            const fullUrl = `${liveOrigin}${ep}`;
+
+            if (appState.codeLang === 'curl') {
+                el.textContent = `curl -X POST "${fullUrl}" \\
+  -H "Content-Type: application/json" \\
+  -d '${payload.replace(/\n\s*/g, ' ')}'`;
+            } else if (appState.codeLang === 'python') {
+                el.textContent = `import requests
+
+url = "${fullUrl}"
+payload = ${payload}
+
+res = requests.post(url, json=payload)
+print(res.json())`;
+            } else {
+                el.textContent = `const res = await fetch("${fullUrl}", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(${payload})
+});
+const data = await res.json();
+console.log(data);`;
+            }
+        }
+
+        // =========================================================================
+        // UTILITIES & CATALOG RESET
+        // =========================================================================
+
+        async function resetStoreData() {
+            playSound('click');
+            if (!confirm('Reload standard catalog products and transaction activity?')) return;
+            try {
+                await fetchJson('/api/demo/reset', { method: 'POST' });
+                playSound('success');
+                showToast('Catalog restored', 'success');
+                await refreshAllData(false);
+            } catch (err) {
+                showToast(`Failed: ${err.message}`, 'error');
+            }
+        }
+
+        function downloadFile(content, fileName, type) {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([content], { type }));
+            a.download = fileName;
+            a.click();
+        }
+
+        // =========================================================================
+        // INIT
+        // =========================================================================
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            selectEndpoint('pricing');
+            calculateLiveMathPreview();
+            updateBellCurveVisual();
+            refreshAllData(false);
+        });
+    </script>
+</body>
+
+</html>
