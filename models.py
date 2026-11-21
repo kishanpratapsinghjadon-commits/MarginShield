@@ -1,4 +1,5 @@
 import os
+import tempfile
 from datetime import datetime, timezone
 from typing import List, Optional
 
@@ -6,14 +7,47 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import Boolean, Column, DateTime, Float, Integer, JSON, String, Text, create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-# Ensure SQLite data directory exists for local and Docker volume persistence
-os.makedirs("data", exist_ok=True)
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/secureprice.db")
+# ---------------------------------------------------------------------------
+# Database Configuration (Vercel Serverless & Local Compatible)
+# ---------------------------------------------------------------------------
 
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {},
-)
+# Detect Vercel / AWS Lambda serverless read-only filesystem
+is_serverless = bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    if is_serverless:
+        # /var/task is read-only on Vercel; writable storage is strictly in /tmp
+        tmp_db = os.path.join(tempfile.gettempdir(), "secureprice.db").replace("\\", "/")
+        DATABASE_URL = f"sqlite:///{tmp_db}"
+    else:
+        try:
+            os.makedirs("data", exist_ok=True)
+            DATABASE_URL = "sqlite:///./data/secureprice.db"
+        except (OSError, PermissionError):
+            tmp_db = os.path.join(tempfile.gettempdir(), "secureprice.db").replace("\\", "/")
+            DATABASE_URL = f"sqlite:///{tmp_db}"
+else:
+    # If custom SQLite URL points to ./data, ensure folder exists or fallback to /tmp
+    if "sqlite:///" in DATABASE_URL and "./data" in DATABASE_URL:
+        try:
+            os.makedirs("data", exist_ok=True)
+        except (OSError, PermissionError):
+            tmp_db = os.path.join(tempfile.gettempdir(), "secureprice.db").replace("\\", "/")
+            DATABASE_URL = f"sqlite:///{tmp_db}"
+
+try:
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {},
+    )
+except Exception:
+    # Failsafe in-memory database to prevent import-time crashes
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+    )
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

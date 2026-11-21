@@ -1,14 +1,21 @@
 import os
-from dotenv import load_dotenv
-load_dotenv()
+import sys
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Generator, List
 
-from fastapi import Depends, FastAPI  # type: ignore[import-not-found]
+# Ensure current directory is in sys.path for local module resolution across serverless runtimes
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
+
+from dotenv import load_dotenv
+load_dotenv()
+
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
-from google import genai  # Official Google GenAI SDK replacing legacy google-generativeai
+from fastapi.responses import FileResponse, HTMLResponse, Response
+from google import genai
 from sqlalchemy.orm import Session
 
 from engine import (
@@ -29,9 +36,28 @@ from models import (
     engine,
 )
 
+# Flag to guarantee tables and seed data are initialized even if ASGI lifespan is skipped by serverless
+_db_initialized = False
+
+def ensure_db_initialized() -> None:
+    """Safely initialize tables on first request (essential for serverless environments)."""
+    global _db_initialized
+    if not _db_initialized:
+        try:
+            Base.metadata.create_all(bind=engine)
+            db = SessionLocal()
+            try:
+                seed_initial_data(db)
+            finally:
+                db.close()
+            _db_initialized = True
+        except Exception as exc:
+            print(f"Non-fatal notice during database setup: {exc}")
+
 
 def get_db() -> Generator[Session, None, None]:
     """Provide a transactional SQLAlchemy database session per request."""
+    ensure_db_initialized()
     db = SessionLocal()
     try:
         yield db
@@ -154,12 +180,11 @@ def seed_initial_data(db: Session) -> None:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    Base.metadata.create_all(bind=engine)
-    db = SessionLocal()
+    """Safely initialize database tables on startup."""
     try:
-        seed_initial_data(db)
-    finally:
-        db.close()
+        ensure_db_initialized()
+    except Exception as exc:
+        print(f"Non-fatal notice during lifespan startup: {exc}")
     yield
 
 
@@ -170,6 +195,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Export standard ASGI aliases for Vercel serverless runtime detection
+application = app
+handler = app
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -178,11 +207,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+INDEX_FILE_PATH = os.path.join(BASE_DIR, "index.html")
+
 
 @app.get("/", include_in_schema=False)
 def serve_dashboard():
     """Serve the single-page Tailwind/JS seller dashboard."""
-    return FileResponse("index.html")
+    if os.path.exists(INDEX_FILE_PATH):
+        return FileResponse(INDEX_FILE_PATH)
+    if os.path.exists("index.html"):
+        return FileResponse("index.html")
+    return HTMLResponse("<h1>MarginShield AI</h1><p>Dashboard is ready.</p>")
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    """Prevent 404/500 errors when browsers request favicon."""
+    return Response(status_code=204)
 
 
 @app.get("/health")
